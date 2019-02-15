@@ -9,7 +9,8 @@ fs = require('fs'),
     app = express(),
     // favicon = require('serve-favicon'),
     statics = require('serve-static'),
-    basicAuth = require('basic-auth');
+    // basicAuth = require('basic-auth');
+    passport = require('passport');
 
 // late def, wait until pod is ready
 var conf = pod.reloadConfig()
@@ -19,17 +20,17 @@ var reloadConf = function (req, res, next) {
     conf = pod.reloadConfig()
     next()
 }
-var auth = function (req, res, next) {
-    var user = basicAuth(req);
-    const username = (conf.web.username || 'admin');
-    const password = (conf.web.password || 'admin');
-    console.log(JSON.stringify(user))
-    if (!user || user.name !== username || user.pass !== password) {
-        res.setHeader('WWW-Authenticate', 'Basic realm=Authorization Required');
-        return res.sendStatus(401);
-    }
-    next();
-};
+// var auth = function (req, res, next) {
+//     var user = basicAuth(req);
+//     const username = (conf.web.username || 'admin');
+//     const password = (conf.web.password || 'admin');
+//     console.log(JSON.stringify(user))
+//     if (!user || user.name !== username || user.pass !== password) {
+//         res.setHeader('WWW-Authenticate', 'Basic realm=Authorization Required');
+//         return res.sendStatus(401);
+//     }
+//     next();
+// };
 
 app.set('views', __dirname + '/views')
 app.set('view engine', 'ejs')
@@ -37,9 +38,10 @@ app.set('view engine', 'ejs')
 app.use(reloadConf)
 app.use(bodyParser.json())
 app.use(statics(path.join(__dirname, 'static')))
+app.use(passport.initialize())
 
 
-app.get('/', auth, function (req, res) {
+app.get('/', passport.authenticate('discord'), function (req, res) {
     pod.listApps(function (err, list) {
         if (err) return res.end(err)
         return res.render('index', {
@@ -47,6 +49,8 @@ app.get('/', auth, function (req, res) {
         })
     })
 })
+
+app.get('/auth', passport.authenticate('discord', {failureRedirect: '/'}), (req, res) => res.redirect('/'))
 
 app.get('/json', auth, function (req, res) {
     pod.listApps(function (err, list) {
