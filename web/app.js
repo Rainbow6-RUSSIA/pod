@@ -1,15 +1,18 @@
 const
-    bodyParser = require('body-parser');
-fs = require('fs'),
+    bodyParser = require('body-parser'),
+    fs = require('fs'),
     path = require('path'),
     spawn = require('child_process').spawn,
     express = require('express'),
     pod = require('../lib/api'),
     ghURL = require('parse-github-url'),
     app = express(),
+    cookieSession = require('cookie-session'),
+    morgan = require('morgan'),
     // favicon = require('serve-favicon'),
     statics = require('serve-static'),
-    basicAuth = require('basic-auth');
+    // basicAuth = require('basic-auth');
+    passport = require('passport');
 
 // late def, wait until pod is ready
 var conf = pod.reloadConfig()
@@ -19,27 +22,46 @@ var reloadConf = function (req, res, next) {
     conf = pod.reloadConfig()
     next()
 }
-var auth = function (req, res, next) {
-    var user = basicAuth(req);
-    const username = (conf.web.username || 'admin');
-    const password = (conf.web.password || 'admin');
-    console.log(JSON.stringify(user))
-    if (!user || user.name !== username || user.pass !== password) {
-        res.setHeader('WWW-Authenticate', 'Basic realm=Authorization Required');
-        return res.sendStatus(401);
-    }
-    next();
-};
+// var auth = function (req, res, next) {
+//     var user = basicAuth(req);
+//     const username = (conf.web.username || 'admin');
+//     const password = (conf.web.password || 'admin');
+//     console.log(JSON.stringify(user))
+//     if (!user || user.name !== username || user.pass !== password) {
+//         res.setHeader('WWW-Authenticate', 'Basic realm=Authorization Required');
+//         return res.sendStatus(401);
+//     }
+//     next();
+// };
 
 app.set('views', __dirname + '/views')
 app.set('view engine', 'ejs')
 //app.use(favicon())
+app.use(cookieSession({
+    maxAge: 24 * 60 * 60 * 1000,
+    keys: ['lol1337'],
+}))
+app.use(morgan('short'))
 app.use(reloadConf)
 app.use(bodyParser.json())
 app.use(statics(path.join(__dirname, 'static')))
+app.use(passport.initialize())
+app.use(passport.session())
 
+require('./passport');
 
-app.get('/', auth, function (req, res) {
+passport.serializeUser((user, done) => done(null, user));
+passport.deserializeUser((user, done) => done(null, user));
+
+function isAuth (req, res, next) {
+    if (req.isAuthenticated()) {
+        return next();
+    } else {
+        return res.redirect('/login')
+    }
+}
+
+app.get('/', isAuth, function (req, res) {
     pod.listApps(function (err, list) {
         if (err) return res.end(err)
         return res.render('index', {
@@ -48,7 +70,11 @@ app.get('/', auth, function (req, res) {
     })
 })
 
-app.get('/json', auth, function (req, res) {
+app.get('/login', passport.authenticate('discord'))
+
+app.get('/auth', passport.authenticate('discord', { failureRedirect: '/login', successRedirect: '/' }))
+
+app.get('/json', isAuth, function (req, res) {
     pod.listApps(function (err, list) {
         if (err) return res.end(err)
         res.json(list)
@@ -200,3 +226,23 @@ function executeHook(appid, app, payload, cb) {
     })
 }
 
+const pty = require('node-pty');
+const ews = require('express-ws')(app);
+const os = require('os');
+
+ews.app.ws('/xterm', (ws, req) => {
+    const isWin = os.platform() === 'win32';
+    const xterm = pty.spawn(isWin ? 'cmd.exe' : 'bash', [], {
+        name: 'xterm-color',
+        cwd: process.env[isWin ? 'USERPROFILE' : 'HOME'],
+        env: process.env
+    });
+
+    xterm.on('data', (data) => {
+        ws.send(data);
+    });
+
+    ws.on('message', (msg) => {
+        xterm.write(msg);
+    })
+})

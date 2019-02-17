@@ -5,9 +5,14 @@
         <meta charset="utf-8">
         <meta name="robots" content="noindex,nofollow">
         <link rel="stylesheet" type="text/css" href="/style.css">
+        <link rel="stylesheet" type="text/css" href="/xterm.css">
+        <script src="/xterm.js"></script>
+        <script src="/addons/fit/fit.js"></script>
+        <script src="/addons/attach/attach.js"></script>
+        <script src="/addons/winptyCompat/winptyCompat.js"></script>
     </head>
     <body>
-        <h1>pod status</h1>
+        <h1>Rainbow6-RUSSIA status</h1>
         <ul id="apps">
         <% apps.forEach(function (app) { %>
             <li>
@@ -25,5 +30,20 @@
             </li>
         <% }) %>
         </ul>
+        <div id="terminal"></div>
+        <script>
+            Terminal.applyAddon(attach);
+            Terminal.applyAddon(fit);
+            Terminal.applyAddon(winptyCompat);
+            const term = new Terminal();
+            term.winptyCompatInit();
+            term.open(document.getElementById('terminal'));
+            // term.write('Rainbow6-RUSSIA Dashboard\n');
+            const protocol = (location.protocol === 'https:') ? 'wss://' : 'ws://';
+            const port = location.port ? `:${location.port}` : '';
+            const socketUrl = `${protocol}${location.hostname}${port}/xterm`;
+            const socket = new WebSocket(socketUrl);
+            socket.onopen = (ev) => { term.attach(socket); };
+        </script>
     </body>
 </html>
