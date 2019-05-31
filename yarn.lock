@@ -3206,9 +3206,9 @@ xfs@~0.1.8:
   integrity sha1-TdL9uyraKifmxdRxy1fAleZStwM=
 
 xterm@^3.11.0:
-  version "3.11.0"
-  resolved "https://registry.yarnpkg.com/xterm/-/xterm-3.11.0.tgz#2c10da3e965db9170430aa7b68f8965de3ff004d"
-  integrity sha512-VB9+s2Fhig31pNBkbxPnz+/wdCvxdQ6JQ0HZmWDwpULV8iAggzxoyUonB4FR+WW3lj0LNVb/ZaD64rxbw+HB4A==
+  version "3.14.0"
+  resolved "https://registry.yarnpkg.com/xterm/-/xterm-3.14.0.tgz#cee4c64aa3068955a42a15aad867ef40a20c8f5a"
+  integrity sha512-a5qL7iDLuzAzul6BHADoluO8yN3e8tEVMTACBXyi84WLExiz5Sc+hRrV4XL9gg3J3I3Gnh+C9FlsNuPtiRP7Wg==
 
 yallist@^3.0.0, yallist@^3.0.2:
   version "3.0.3"
