@@ -2126,9 +2126,9 @@ pm2-multimeter@^0.1.2:
     charm "~0.1.1"
 
 pm2@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/pm2/-/pm2-4.0.0.tgz#b7ce44342a32cf1f3e4b5cf027d00194d23eb29b"
-  integrity sha512-PLJy3ex9pRrtP2ACs9qO45MGEk//AfYN1gjBvlGs725B51o5PkT8ZGP0YIFnOba3xRzsgIXG4g/Hf6gfztiNSQ==
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/pm2/-/pm2-4.0.1.tgz#7e9cbd3cce75083180707d53bd4712adb6f8ad40"
+  integrity sha512-MmRc1vz8wH/TZFuPRHUzY/EJFtCrnzN4UzBA4OOQrYGVoNxmtOIJC+sKxYuFqy7OWAVpmZlLQmCOnt2L3FE/gg==
   dependencies:
     "@pm2/agent" "^0.5.26"
     "@pm2/io" "^4.3.2"
